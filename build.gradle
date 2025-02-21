@@ -32,6 +32,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names' //json 라이브러리 추가
 	implementation 'software.amazon.awssdk:s3:2.20.43'  //s3파일 업로드 의존성 추가
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'    //swagger 용 dependency(3버전 이상은 해당 디텐던시를 사용)
+	implementation 'org.springframework.batch:spring-batch-core:5.0.0'
 	implementation 'net.coobird:thumbnailator:0.4.14'   //파일 썸네일 생성
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
