@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.urbmi.mvp.config.interceptor.logging.mapper.ComLoggingMapper"> <!--yml에서 alias 설정을 통해 줄일 수 있음.-->
+
+    <!-- SELECT List -->
+    <insert id="insertLog" parameterType="com.urbmi.mvp.config.interceptor.logging.domain.ComLoggingDomain">
+        insert into com_access_logs(
+            request_time
+            ,ip_address
+            ,os_info
+            ,user_agent
+            ,request_url
+            ,query_string
+            ,request_method
+            ,status_code
+            ,processing_time
+            ,session_id
+            ,user_id
+            ,headers
+            ,crt_dt
+        ) values(
+                #{requestTime}
+                ,#{ipAddress}
+                ,#{osInfo}
+                ,#{userAgent}
+                ,#{requestUrl}
+                ,#{queryString}
+                ,#{requestMethod}
+                ,#{statusCode}
+                ,#{processingTime}
+                ,#{sessionId}
+                ,#{userId}
+                ,#{headers}
+                ,NOW()
+                        )
+    </insert>
+
+</mapper>

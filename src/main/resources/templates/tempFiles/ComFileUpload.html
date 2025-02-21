@@ -1,0 +1,23 @@
+<!--ComFileUpload.html (DROPZONE 활용 파일 업로드)-->
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<!--<body>-->
+<div th:fragment="fileupload(fileDiv, fileId, fileType, fileSize,fileCnt, filePath,fileList)">
+    <div class="dropzone" th:id="${fileDiv}"></div>
+
+    <!-- JS 파일 로드 -->
+    <script src="/js/ComFileUploadInit.js"></script>
+
+    <script type="text/javascript">
+        Dropzone.autoDiscover = false;
+        <!-- 파일 업로드를 위한 Dropzone 초기화 -->
+        document.addEventListener("DOMContentLoaded", function () {
+            initDropzone('[[${fileDiv}]]', '[[${fileId}]]', '[[${fileType}]]', '[[${fileSize}]]', '[[${fileCnt}]]','[[${filePath}]]','[[${fileList}]]');
+        });
+    </script>
+
+</div>
+
+</html>

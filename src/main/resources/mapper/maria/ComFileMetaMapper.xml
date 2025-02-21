@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.urbmi.mvp.common.file.mapper.ComFileMetaMapper"> <!--yml에서 alias 설정을 통해 줄일 수 있음.-->
+
+    <!-- Insert File Meta -->
+    <insert id="insertFileMeta" parameterType="com.urbmi.mvp.common.file.domain.ComFileDomain" useGeneratedKeys="true" keyProperty="fileId">
+        <!-- 동적 시퀀스 생성 -->
+        <selectKey keyProperty="fileSeq" resultType="int" order="BEFORE">
+            SELECT COALESCE(MAX(file_seq), 0) + 1
+            FROM com_file
+            WHERE file_id = #{fileId}
+        </selectKey>
+
+        INSERT INTO com_file (
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            crt_dt,
+            crt_id,
+            crt_ip_addr
+        ) VALUES (
+            #{fileId},
+            #{fileSeq},
+            #{fileUpldNm},
+            #{fileOrignNm},
+            #{filePath},
+            #{fileModule},
+            #{fileOrd},
+            NOW(),
+            #{crtId},
+            #{crtIpAddr}
+        )
+    </insert>
+
+
+
+    <select id="selectLatestFileMeta" resultType="com.urbmi.mvp.common.file.domain.ComFileDomain">
+        SELECT
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            del_yn,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt,
+            upd_id,
+            upd_ip_addr,
+            del_dt,
+            del_id,
+            del_ip_addr
+        FROM com_file
+        WHERE file_id = #{fileId}
+          AND DEL_YN = 'N'
+        ORDER BY file_seq DESC
+            LIMIT 1
+    </select>
+    <select id="selectFileMeta" resultType="com.urbmi.mvp.common.file.domain.ComFileDomain">
+        SELECT
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            del_yn,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt,
+            upd_id,
+            upd_ip_addr,
+            del_dt,
+            del_id,
+            del_ip_addr
+        FROM com_file
+        WHERE file_id = #{fileId}
+        AND file_seq = #{fileSeq}
+        AND DEL_YN = 'N'
+
+    </select>
+
+    <select id="selectLatestFileMetaPath" resultType="java.lang.String">
+        SELECT
+            concat(concat(file_path,'/'),file_upld_nm)
+        FROM com_file
+        WHERE file_id = #{fileId}
+          AND DEL_YN = 'N'
+          ORDER BY file_seq DESC
+    </select>
+
+    <select id="selectFileMetaPath" resultType="java.lang.String">
+        SELECT
+            concat(concat(file_path,'/'),file_upld_nm)
+        FROM com_file
+        WHERE file_id = #{fileId}
+        AND file_seq = #{fileSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <select id="selectFileMetaList" resultType="com.urbmi.mvp.common.file.domain.ComFileDomain">
+        SELECT
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            del_yn,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt,
+            upd_id,
+            upd_ip_addr,
+            del_dt,
+            del_id,
+            del_ip_addr
+        FROM com_file
+        WHERE file_id = #{fileId}
+          AND DEL_YN = 'N'
+        order by file_seq desc
+    </select>
+
+
+    <select id="selectFileMetaListCount" resultType="int">
+        SELECT
+            count(*)
+        FROM com_file
+        WHERE file_id = #{fileId}
+          AND DEL_YN = 'N'
+    </select>
+
+
+
+
+
+</mapper>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+
+
+
+<!-- 파일 업로드 영역 -->
+<form th:action="@{/view/tempFiles/upload}" method="POST" class="dropzone" id="my-dropzone">
+    <input type="hidden" name="fileId" id="fileId" value=""/>
+    <!-- Dropzone은 파일 업로드와 관련된 정보는 form에 필요 없음, 여기서는 그냥 업로드 영역만 -->
+</form>
+
+<script type="text/javascript">
+    // 파일 업로드에 필요한 설정을 서버에서 받은 값으로 동적으로 설정
+    var upldFileType = '[[${fileUploadInfo.fileType}]]' ;  // 이미지 타입만 허용
+    var upldFileSize = '[[${fileUploadInfo.fileSize}]]' ;      // 최대 파일 사이즈 10MB
+    var upldFilePath = '[[${fileUploadInfo.filePath}]]' ;  // 업로드할 파일 경로 (백엔드에서 파일 경로 정보)
+
+
+    let fileExtValidate = "*";  // 기본값은 모든 파일 타입
+
+    // IMAGE일 때만 해당 확장자 배열을 사용
+    if (upldFileType === 'IMAGE') {
+        fileExtValidate = ["jpg", "jpeg", "png", "gif", "bmp"].join(","); // IMAGE 타입의 확장자들
+    } else if (upldFileType === 'DOCUMENT') {
+        fileExtValidate = ["pdf", "doc", "docx", "txt", "hwp", "hwpx", "xls", "xlsx"].join(",");
+    } else if (upldFileType === 'VIDEO') {
+        fileExtValidate = ["mp4", "avi", "mkv"].join(",");
+    } else if (upldFileType === 'AUDIO') {
+        fileExtValidate = ["mp3", "wav", "aac"].join(",");
+    }
+
+    Dropzone.options.myDropzone = {
+        url: "/api/tempFiles/upload",  // 파일 업로드 처리 URL
+        maxFilesize: upldFileSize,  // 최대 파일 크기 10MB
+        // acceptedFiles:  fileExtValidate,  // fileType에 따라 이미지만 허용
+        method : 'post',
+        paramName: 'files', // 서버에서 사용할 formdata 이름 설정 (default는 file)
+        addRemoveLinks: true,   //삭제 버튼 활성화
+        dictRemoveFile: '삭제', // 삭제버튼 표시 텍스트
+        params: function() {
+            // 서버로 전송할 추가 데이터 (fileType, fileSize, filePath 포함)
+            return {
+                fileType: upldFileType,
+                fileSize: upldFileSize,
+                filePath: upldFilePath
+            };
+        },
+        init: function() {
+            // 최초 dropzone 설정시 init을 통해 호출
+            // 파일 업로드 성공 시 동작
+            this.on("success", function(file, response) {
+                console.log("파일 업로드 요청 성공:", response);
+                if(response.code == 'SUCCESS'){
+                    // 서버에서 반환된 fileId를 hidden 필드에 설정
+                    document.getElementById("fileId").value = response.data.fileId;
+                    file.fileId = response.data.fileId;
+                    file.fileSeq = response.data.fileSeq;
+                    file.fileOrd = response.data.fileOrd;
+                }else{
+                    alert(response.message);
+                }
+
+
+            });
+            // 파일 업로드 실패 시 동작
+            this.on("error", function(file, errorMessage) {
+                console.log(errorMessage)
+                console.error("파일 업로드 실패:", errorMessage);
+            });
+            // 파일 삭제 시 동작
+            this.on("removedfile", function(file) {
+                if (file.fileSeq) {
+                    console.log("파일 삭제 시 fileSeq:", file.fileSeq);
+                    // 서버에 fileSeq와 함께 삭제 요청 보내기
+                    fetch('/api/tempFiles/upload/'+file.fileId, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ fileSeq: file.fileSeq, fileId: document.getElementById("fileId").value })
+                    }).then(response => {
+                        if (!response.ok) {
+                            console.log(response);
+                            throw new Error('파일 삭제 실패');
+                        }
+                        return response.json();
+                    }).then(data => {
+                        console.log("파일 삭제 완료:", data);
+                        // 파일 삭제 완료 후 UI에서 해당 파일 제거 (예: Dropzone에서)
+                        // 추가 UI 업데이트 로직 필요시 여기 작성
+                    }).catch(error => {
+                        console.error("파일 삭제 실패:", error);
+                        alert("파일 삭제에 실패했습니다. 다시 시도해주세요.");
+                    });
+                }
+            });
+        }
+    };
+</script>
+</body>
+</html>

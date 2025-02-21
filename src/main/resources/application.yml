@@ -1,0 +1,45 @@
+spring:
+  # 기본 설정 (local에서 사용할 내용만 포함)
+  datasource:
+    url:
+    driver-class-name: org.mariadb.jdbc.Driver
+    username:
+    password:
+    hikari:
+      maximum-pool-size: 10
+  file-storage:
+    path: /Users/nive/IntelljProjects/personal/git/mvp/src/main/resources/upload
+
+  mybatis:
+    mapper-locations: classpath:mapper/maria/*.xml
+    type-aliases-package: com.urbmi.mvp.*.domain
+    configuration:
+      map-underscore-to-camel
+
+springdoc:
+  api-docs:
+#    title: "SpringBoot 3.4.1 + Gradle + YML + Mybatis API Documentation" # API 문서 제목
+#    description: "This is the API documentation for SpringBoot 3.4.1 Rest API System" # API 문서 설명
+#    version: "@springdoc.version@" # API 버전
+#    terms-of-service: "http://example.com/terms" # 서비스 약관 링크
+#    enabled: true
+    path: /api-docs
+  swagger-ui:
+    disable-swagger-default-url: true
+    display-request-duration: false # 요청 지속 시간 표시 여부
+    operations-sorter: alpha
+    enabled: true # Swagger UI 활성화
+    path: "/swagger-ui.html" # Swagger UI의 경로
+    doc-expansion: "none" # 요청/응답 필드 기본적으로 접힘 상태
+    default-consumes-media-type: application/json;charset=UTF-8
+    default-produces-media-type: application/json;charset=UTF-8
+    default-model-expand-depth: 1 # 모델에 대한 기본 확장 깊이
+    default-model-rendering: "model" # 모델 표시 형식 (example, model)
+    display-operation-id: true # operationId 표시 여부
+    display-request-size: true # 요청 크기 표시 여부
+    display-response-size: true # 응답 크기 표시 여부
+    filter: true # 필터 활성화 (필터를 사용하여 특정 API만 표시)
+    show-extensions: true # 확장 정보 표시 여부
+    show-common-extensions: true # 공통 확장 정보 표시 여부
+    tags-sorter: alpha
+  packages-to-scan: com.urbmi.mvp

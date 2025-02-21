@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.urbmi.mvp.common.file.mapper.ComFileTempMetaMapper"> <!--yml에서 alias 설정을 통해 줄일 수 있음.-->
+
+
+    <insert id="insertFileTempMeta" parameterType="com.urbmi.mvp.common.file.domain.ComFileTempDomain" useGeneratedKeys="true" keyProperty="tempId">
+        <!-- fileSeq 값 동적 생성 -->
+        <selectKey keyProperty="fileSeq" resultType="int" order="BEFORE">
+            SELECT COALESCE(MAX(file_seq), 0) + 1
+            FROM com_file_temp
+            WHERE file_id = #{fileId}
+        </selectKey>
+
+        INSERT INTO com_file_temp (
+        file_id,
+        file_seq,
+        file_upld_nm,
+        file_orign_nm,
+        file_path,
+        file_module,
+        file_ord,
+        file_size,
+        file_status,
+        expire_dt,
+        crt_dt,
+        crt_id,
+        crt_ip_addr
+        ) VALUES (
+        #{fileId},
+        #{fileSeq},
+        #{fileUpldNm},
+        #{fileOrignNm},
+        #{filePath},
+        #{fileModule},
+        #{fileOrd},
+        #{fileSize},
+        'PENDING',
+        DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 12 HOUR),
+        NOW(),
+        #{crtId},
+        #{crtIpAddr}
+        )
+    </insert>
+
+    <!--    Temp meta update status-->
+    <!--처리 대기 상태의 값을 valid, invalid로 처리-->
+    <update id="updateFileTempMetaStatus" parameterType="com.urbmi.mvp.common.file.domain.ComFileTempDomain" >
+
+        UPDATE COM_FILE_TEMP SET
+        FILE_STATUS = #{fileStatus}
+        , upd_dt = now()
+        , upd_id = #{updId}
+        , upd_ip_addr = #{updIpAddr}
+        <if test="fileStatus == 'VALID'">
+            , transfer_dt = now()
+        </if>
+        <if test="fileStatus == 'INVALID'">
+            ,invalid_dt = now()
+            ,invalid_reason = #{invalidReason}
+        </if>
+        WHERE file_id = #{fileId}
+        AND file_seq = #{fileSeq}
+        AND file_status = 'PENDING'
+
+    </update>
+
+    <!--시간이 지난 데이터를 invalid로 처리 batch1-->
+
+    <!--invalid를 delete 처리 batch2-->
+
+    <!--valid된 것을 delete 처리 batch3-->
+
+
+
+
+    <select id="selectLatestFileTempMeta" resultType="com.urbmi.mvp.common.file.domain.ComFileTempDomain">
+        SELECT
+            temp_id,
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            file_size,
+            file_status,
+            expire_dt,
+            invalid_dt,
+            transfer_dt,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt
+        FROM COM_FILE_TEMP
+        WHERE file_id = #{fileId}
+          AND file_status = 'PENDING'
+        ORDER BY file_seq DESC
+            LIMIT 1
+    </select>
+
+    <select id="selectFileTempMeta" resultType="com.urbmi.mvp.common.file.domain.ComFileTempDomain">
+        SELECT
+            temp_id,
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            file_size,
+            file_status,
+            expire_dt,
+            invalid_dt,
+            transfer_dt,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt
+        FROM COM_FILE_TEMP
+        WHERE file_id = #{fileId}
+          AND file_seq = #{fileSeq}
+
+    </select>
+
+    <select id="selectLatestFileTempMetaPath" resultType="java.lang.String">
+        SELECT
+            concat(concat(file_path,'/'),file_upld_nm)
+        FROM com_file_temp
+        WHERE file_id = #{fileId}
+        ORDER BY file_seq DESC
+    </select>
+
+    <select id="selectFileMetaTempPath" resultType="java.lang.String">
+        SELECT
+            concat(concat(file_path,'/'),file_upld_nm)
+        FROM com_file_temp
+        WHERE file_id = #{fileId}
+          AND file_seq = #{fileSeq}
+    </select>
+
+    <select id="selectFileTempMetaList" resultType="com.urbmi.mvp.common.file.domain.ComFileTempDomain">
+        SELECT
+            temp_id,
+            file_id,
+            file_seq,
+            file_upld_nm,
+            file_orign_nm,
+            file_path,
+            file_module,
+            file_ord,
+            file_size,
+            file_status,
+            invalid_dt,
+            transfer_dt,
+            expire_dt,
+            crt_dt,
+            crt_id,
+            crt_ip_addr,
+            upd_dt,
+            upd_id,
+            upd_ip_addr
+        FROM com_file_temp
+        WHERE file_id = #{fileId}
+          and file_status = 'PENDING'
+        order by file_seq desc
+    </select>
+
+
+    <select id="selectFileTempMetaListCount" resultType="int">
+        SELECT
+            count(*)
+        FROM com_file_temp
+        WHERE file_id = #{fileId}
+    </select>
+
+    <delete id="deleteFileTempMeta" parameterType="com.urbmi.mvp.common.file.domain.ComFileTempDomain" >
+        DELETE FROM com_file_temp where file_id = #{fileId} and file_seq = #{fileSeq}
+    </delete>
+
+
+
+
+</mapper>
